@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     wireguard_network: str = "10.104.5.0/24"
     wireguard_dns: str = "1.1.1.1"
 
+    # Load the WireGuard server public key from .env.
+    wireguard_server_public_key: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

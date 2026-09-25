@@ -1,11 +1,5 @@
-import logging
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    status,
-)
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,9 +13,7 @@ from app.schemas import (
     VlessConfig,
 )
 from app.services.client_service import ClientService
-
-
-logger = logging.getLogger(__name__)
+from app.services.wireguard import WireGuardService
 
 
 router = APIRouter(
@@ -43,7 +35,6 @@ def create_client(
 
     try:
         result = service.create_client(
-<<<<<<< HEAD
             name=payload.name,
             mode=payload.mode,
         )
@@ -73,7 +64,7 @@ def create_client(
         private_key = result["private_key"]
         wireguard = WireGuardService()
 
-        server_public_key = os.getenv("WIREGUARD_SERVER_PUBLIC_KEY")
+        server_public_key = settings.wireguard_server_public_key
         if not server_public_key:
             raise RuntimeError("WIREGUARD_SERVER_PUBLIC_KEY is not configured")
 
@@ -83,17 +74,10 @@ def create_client(
             client_ip=client.vpn_ip,
             full_tunnel=True,
         )
-=======
-            payload.name
-        )
-
-        client = result["client"]
->>>>>>> dbc1faef7abfbbd7ad65a47025adad93c621d131
 
         return {
             "name": client.name,
             "vpn_ip": client.vpn_ip,
-<<<<<<< HEAD
             "config": client_config,
             "vless": None,
         }
@@ -102,23 +86,7 @@ def create_client(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
-=======
-            "config": result["config"],
-        }
-
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=str(exc),
-        ) from exc
-
->>>>>>> dbc1faef7abfbbd7ad65a47025adad93c621d131
     except Exception as exc:
-        logger.exception(
-            "Failed to create WireGuard client: %s",
-            exc,
-        )
-
         raise HTTPException(
             status_code=500,
             detail="Failed to create client",
@@ -136,36 +104,12 @@ def list_clients(db: Session = Depends(get_db)):
 def delete_client(client_id: int, db: Session = Depends(get_db)):
     service = ClientService(db)
     try:
-<<<<<<< HEAD
         service.delete_client(client_id)
         return {"message": "Client removed successfully"}
-=======
-        service.delete_client(
-            client_id
-        )
-
-        return {
-            "message": (
-                "WireGuard client removed successfully"
-            ),
-        }
-
->>>>>>> dbc1faef7abfbbd7ad65a47025adad93c621d131
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        logger.exception(
-            "Failed to delete WireGuard client %s: %s",
-            client_id,
-            exc,
-        )
-
         raise HTTPException(
             status_code=500,
-<<<<<<< HEAD
             detail="Failed to delete client",
         ) from exc
-=======
-            detail="Failed to delete WireGuard client",
-        ) from exc
->>>>>>> dbc1faef7abfbbd7ad65a47025adad93c621d131

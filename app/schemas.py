@@ -5,7 +5,8 @@ from pydantic import BaseModel, ConfigDict
 
 class ClientCreateRequest(BaseModel):
     name: str
-    mode: str = "wireguard"
+    # `mode` is now optional and ignored — kept for backward compatibility
+    mode: str | None = None
 
 
 class ClientResponse(BaseModel):
@@ -28,10 +29,11 @@ class VlessConfig(BaseModel):
     path: str
     security: str = "tls"
     sni: str
+    uri: str
 
 
 class ClientConfigResponse(BaseModel):
     name: str
     vpn_ip: str
-    config: str | None = None
-    vless: VlessConfig | None = None
+    config: str | None = None       # WireGuard config
+    vless: VlessConfig | None = None  # VLESS config

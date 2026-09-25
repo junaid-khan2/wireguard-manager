@@ -33,6 +33,12 @@ class WireGuardClient(Base):
         nullable=False,
     )
 
+    vless_uuid: Mapped[str | None] = mapped_column(
+        String(36),
+        unique=True,
+        nullable=True,
+    )
+
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,

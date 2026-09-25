@@ -1,55 +1,25 @@
-# Environment variables / secrets
-.env
-.env.*
-!.env.example
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
 
-# Virtual environments
 venv/
 .venv/
 env/
 ENV/
 
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
+.env
+.env.*
+!.env.example
 
-# Testing / coverage
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-
-# IDEs
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Local databases
+data/
+*.db
 *.sqlite
 *.sqlite3
-*.db
 
-# Build / distribution
-build/
-dist/
-*.egg-info/
+.vscode/
+.idea/
+*.swp
+.DS_Store
 
-# Temporary files
-*.tmp
-*.temp
-
-# Secrets / keys
-*.pem
-*.key
-*.secret
-
-# WireGuard generated client configs
-*.conf
+*.log

@@ -110,34 +110,33 @@ PublicKey = {client_public_key}
 AllowedIPs = {client_ip}/32
 """
 
-        self.write_config_atomically(config.rstrip() + peer_block + "\n")
+    self.write_config_atomically(config.rstrip() + peer_block + "\n")
 
     def remove_peer(self, client_public_key: str) -> None:
         config = self.read_config()
 
-        pattern = re.compile(
-            r"\n\[Peer\]\n"
-            r"(?:.*\n)*?"
-            r"(?=^\[Peer\]|\Z)",
-            re.MULTILINE,
-        )
-
-        blocks = pattern.findall(config)
-        remaining_blocks = []
-
-        for block in blocks:
-            if f"PublicKey = {client_public_key}" not in block:
-                remaining_blocks.append(block)
-
-        if not blocks:
+        if "[Peer]" not in config:
             raise WireGuardError("No peer blocks found in WireGuard config")
 
-        base_config = config.split("[Peer]", 1)[0].rstrip()
+        parts = config.split("[Peer]")
+        header = parts[0].rstrip()
 
-        new_config = base_config
+        kept_peers = []
+        removed = False
 
-        for block in remaining_blocks:
-            new_config += "\n" + block.rstrip() + "\n"
+        for block in parts[1:]:
+            if f"PublicKey = {client_public_key}" in block:
+                removed = True
+                continue
+            kept_peers.append(block.rstrip())
+
+        if not removed:
+            raise WireGuardError("Peer not found in WireGuard config")
+
+        new_config = header
+        for block in kept_peers:
+            new_config += "\n\n[Peer]" + block
+        new_config += "\n"
 
         self.write_config_atomically(new_config)
 
@@ -157,16 +156,20 @@ AllowedIPs = {client_ip}/32
         client_ip: str,
         full_tunnel: bool = True,
     ) -> str:
-        allowed_ips = "0.0.0.0/0" if full_tunnel else "10.104.5.0/24"
+        if full_tunnel:
+            allowed_ips = "0.0.0.0/0, ::/0"
+        else:
+            allowed_ips = settings.wireguard_network
 
         return f"""[Interface]
-PrivateKey = {client_private_key}
-Address = {client_ip}/24
-DNS = {settings.wireguard_dns}
+    PrivateKey = {client_private_key}
+    Address = {client_ip}/32
+    DNS = {settings.wireguard_dns}
+    MTU = {settings.wireguard_mtu}
 
-[Peer]
-PublicKey = {server_public_key}
-Endpoint = {settings.wireguard_server_public_ip}:{settings.wireguard_server_port}
-AllowedIPs = {allowed_ips}
-PersistentKeepalive = 25
-"""
+    [Peer]
+    PublicKey = {server_public_key}
+    Endpoint = {settings.wireguard_server_public_ip}:{settings.wireguard_server_port}
+    AllowedIPs = {allowed_ips}
+    PersistentKeepalive = 25
+    """

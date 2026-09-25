@@ -22,4 +22,8 @@ data/
 *.swp
 .DS_Store
 
+<<<<<<< HEAD
 *.log
+=======
+*.log
+>>>>>>> dbc1faef7abfbbd7ad65a47025adad93c621d131

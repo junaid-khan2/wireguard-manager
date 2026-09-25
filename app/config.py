@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     vless_sni: str = "2.25.222.27"
     xray_config_path: str = "/usr/local/etc/xray/config.json"
 
+    # Load the WireGuard server public key from .env.
+    wireguard_server_public_key: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
